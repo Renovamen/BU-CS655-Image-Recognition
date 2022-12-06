@@ -5,7 +5,7 @@ import uuid
 from base58 import b58encode
 from multiprocessing import Queue
 from threading import Thread, Semaphore
-from flask import Flask, request, abort, send_file
+from flask import Flask, request, send_file
 from flask_socketio import SocketIO
 from flask_cors import CORS
 
@@ -14,7 +14,6 @@ from utils import get_opts, get_image_path, load_image
 # constants
 FLICKR_ALPHABET = b"123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 BUFFER_SIZE = 1024
-IMAGE_DIR = "temp"
 N_IMAGES = 3
 N_WORKERS = 3
 
@@ -134,22 +133,15 @@ def receive_img():
         start_time = time.time()
 
     worker_thread = Thread(target=send_img_to_worker, args=(task_id,))
-    worker_thread.setDaemon(True)
+    worker_thread.daemon = True
     worker_thread.start()
 
     return task_id
 
 @app.route("/upload/<task_id>", methods=["GET"])
 def send_img_to_frontend(task_id: str):
-    img_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        get_image_path(task_id)
-    )
-
-    if os.path.exists(img_path) and os.path.isfile(img_path):
-        return send_file(img_path, task_id)
-    else:
-        abort(404)
+    img_path = get_image_path(task_id)
+    return send_file(img_path, task_id)
 
 @app.route("/", defaults={"path": "index.html"})
 @app.route("/<path:path>", methods=["GET"])

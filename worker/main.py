@@ -5,12 +5,12 @@ import time
 import argparse
 import numpy as np
 import torch
-import torchvision
+from torchvision.models import googlenet
 
 BUFFER_SIZE = 1024
 
 # load model
-model = torchvision.models.googlenet(pretrained=True)
+model = googlenet(pretrained=True)
 model.eval()
 
 # load class names (labels)

@@ -24,10 +24,12 @@
 
 Fisrt, use [`geni.xml`](geni.xml) to reserve resources on GENI.
 
-Then, log in to **web-interface** node and install dependencies:
+Then, log in to **web-interface** node, clone Github repo and install dependencies:
 
 ```bash
-cd backend
+git clone https://github.com/Renovamen/BU-CS655-Image-Recognition.git
+
+cd BU-CS655-Image-Recognition/backend
 
 chmod +x ./install.sh
 ./install.sh
@@ -36,22 +38,30 @@ chmod +x ./install.sh
 After that, log in to **node-1**, **node-2** and **node-3**, respectively:
 
 ```bash
-cd worker
+git clone https://github.com/Renovamen/BU-CS655-Image-Recognition.git
+
+cd BU-CS655-Image-Recognition/worker
 
 chmod +x ./install.sh
 ./install.sh
 ```
 
 
+&nbsp;
+
 ### Run Web Interface
+
+Log in to **web-interface** node and:
 
 ```bash
 cd backend
 
 chmod +x ./run.sh
-./run.sh
+sudo ./run.sh
 ```
 
+
+&nbsp;
 
 ### Run workers
 

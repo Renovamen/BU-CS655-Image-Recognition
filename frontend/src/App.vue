@@ -21,7 +21,8 @@
       >
         <a-card hoverable style="width: 300px">
           <template #cover>
-            <a-image :width="300" :src="HOSTNAME + item.imageUrl" />
+            <!-- <a-image :width="300" :src="HOSTNAME + item.imageUrl" /> -->
+            <a-image :width="300" :src="item.imageUrl" />
           </template>
           <a-card-meta :title="`${item.name} is:`">
             <template #description>
@@ -41,14 +42,16 @@ import { InboxOutlined } from "@ant-design/icons-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
 
-const HOSTNAME = "http://127.0.0.1:80";
-const API = HOSTNAME + "/api/task";
+// const HOSTNAME = "http://127.0.0.1:80/";
+// const API = HOSTNAME + "api/task";
+const API = "api/task";
 
 const resultList = ref<any>([]);
 const resultDict = ref<any>({});
 
 // setup socket connection
-const socket = io(HOSTNAME);
+const socket = io();
+// const socket = io(HOSTNAME);
 
 // get a recognition result from backend and display it
 socket.on("result", (data): void => {
@@ -78,7 +81,7 @@ const upload = async ({ onSuccess, onError, file }: any) => {
     // the image URL will be "upload/{requestId}"
     const requestId = result.data;
     const element = {
-      imageUrl: `/upload/${requestId}`,
+      imageUrl: `upload/${requestId}`,
       requestId: requestId,
       name: file.name,
       result: undefined,
