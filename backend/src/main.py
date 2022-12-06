@@ -164,13 +164,13 @@ def connect_to_workers():
     socket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    socket1.bind(("10.10.1.1", 1001))
-    socket2.bind(("10.10.2.2", 1002))
-    socket3.bind(("10.10.3.2", 1003))
+    socket1.bind(("10.10.1.2", 2001))
+    socket2.bind(("10.10.2.1", 2002))
+    socket3.bind(("10.10.3.1", 2003))
 
-    # socket1.bind(("localhost", 1001))
-    # socket2.bind(("localhost", 1002))
-    # socket3.bind(("localhost", 1003))
+    # socket1.bind(("localhost", 2001))
+    # socket2.bind(("localhost", 2002))
+    # socket3.bind(("localhost", 2003))
 
     socket1.listen(5)
     socket2.listen(5)

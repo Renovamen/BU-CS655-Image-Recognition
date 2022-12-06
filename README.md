@@ -46,6 +46,8 @@ chmod +x ./install.sh
 ### Run Web Interface
 
 ```bash
+cd backend
+
 chmod +x ./run.sh
 ./run.sh
 ```
@@ -53,20 +55,21 @@ chmod +x ./run.sh
 
 ### Run workers
 
-**node-1** (10.10.1.1):
+**node-1**:
 
 ```bash
-python3 main.py --hostname 0.0.0.0 --port 1001 --fail 0
+cd worker
+python3 main.py --hostname 10.10.1.2 --port 2001 --fail 0
 ```
 
-**node-2** (10.10.2.2):
+**node-2**:
 
 ```bash
-python3 main.py --hostname 0.0.0.0 --port 1002 --fail 0
+python3 main.py --hostname 10.10.2.1 --port 2002 --fail 0
 ```
 
-**node-3** (10.10.3.2):
+**node-3**:
 
 ```bash
-python3 main.py --hostname 0.0.0.0 --port 1003 --fail 0
+python3 main.py --hostname 10.10.3.1 --port 2003 --fail 0
 ```
