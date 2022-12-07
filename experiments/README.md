@@ -26,6 +26,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 - 14528836.943093367
 - 12018148.687296676
 - 12113291.550477952
+
 95% Confidence Interval: 14193197.1429 ± 1928313.037
 
 ### Number of workers: 2
@@ -39,6 +40,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 2 --images 4 --delay
 - 7260621.367790201
 - 6319580.413989907
 - 6929489.752331601
+
 95% Confidence Interval: 8222225.6971 ± 1846675.551
 
 ### Number of workers: 1
@@ -52,6 +54,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 1 --images 4 --delay
 - 5285867.426616494
 - 5445877.599173843
 - 5903425.398450934
+
 95% Confidence Interval: 6167982.6327 ± 1326339.942
 
 &nbsp;
@@ -79,6 +82,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 - 8086145.111512533
 - 9724041.990045251
 - 5952387.010746283
+
 95% Confidence Interval: 9221141.8049 ± 1854527.319
 
 ### Loss rate: 0.8
@@ -92,6 +96,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 - 2903485.302942034
 - 2029402.203940243
 - 3120940.203409234
+
 95% Confidence Interval: 2943601.3002 ± 513265.35
 
 &nbsp;
@@ -119,6 +124,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 - 11701883.184375245
 - 5383709.236574674
 - 5133526.090101776
+
 95% Confidence Interval: 9594891.2064 ± 3144010.398
 
 ### Delay: 10s
@@ -132,6 +138,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 - 10938081.361847911
 - 5449601.585039886
 - 4514571.208375813
+
 95% Confidence Interval: 7953135.7798 ± 2297107.783
 
 &nbsp;
@@ -159,6 +166,7 @@ python3 main.py --hostname 10.10.1.2 --port 2001 --fail 0.4  # node-1
 - 11993646.426910425
 - 14013012.021931202
 - 15538572.460225407
+
 95% Confidence Interval: 15040344.8562 ± 1840763.646
 
 ### Failure rate: 0.8
@@ -172,4 +180,5 @@ python3 main.py --hostname 10.10.1.2 --port 2001 --fail 0.8  # node-1
 - 10934902.123904102
 - 14023404.130912302
 - 18678672.677461978
+
 95% Confidence Interval: 15177870.0491 ± 2346390.112
