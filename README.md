@@ -1,5 +1,10 @@
 # Image Recognition Application
 
+GENI public routable IP: http://130.127.215.146:80
+
+
+&nbsp;
+
 ## Team & Division of Labor
 
 - Hanlin Zou (U96634471)
@@ -13,7 +18,7 @@
 - Frontend: [Vue 3](https://vuejs.org/) + [Vite 3](https://vitejs.dev/) + [Ant Design](https://antdv.com/)
 - Backend: [Flask](https://flask.palletsprojects.com/)
 - Image Recognition: [PyTorch](https://pytorch.org/)
-- Socket programming
+- Socket
 
 
 &nbsp;
@@ -28,7 +33,6 @@ Then, log in to **web-interface** node, clone Github repo and install dependenci
 
 ```bash
 git clone https://github.com/Renovamen/BU-CS655-Image-Recognition.git
-
 cd BU-CS655-Image-Recognition/backend
 
 chmod +x ./install.sh
@@ -39,7 +43,6 @@ After that, log in to **node-1**, **node-2** and **node-3**, respectively:
 
 ```bash
 git clone https://github.com/Renovamen/BU-CS655-Image-Recognition.git
-
 cd BU-CS655-Image-Recognition/worker
 
 chmod +x ./install.sh
@@ -54,11 +57,18 @@ chmod +x ./install.sh
 Log in to **web-interface** node and:
 
 ```bash
-cd backend
-
-chmod +x ./run.sh
-sudo ./run.sh
+cd backend/src
+sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay 0 --loss 0
 ```
+
+**Options**:
+
+- `hostname`: web interface hostname
+- `port`: web interface port number
+- `workers`: number of avaliable workers, maximum is 3
+- `images`: compute throughput after uploading how many number of images
+- `delay`: worker delay (delay of all workers are the same)
+- `loss`: worker loss rate (loss rate of all workers are the same)
 
 
 &nbsp;
@@ -83,3 +93,23 @@ python3 main.py --hostname 10.10.2.1 --port 2002 --fail 0
 ```bash
 python3 main.py --hostname 10.10.3.1 --port 2003 --fail 0
 ```
+
+**Options**:
+
+- `hostname`: worker hostname
+- `port`: worker port number
+- `fail`: worker failure rate
+
+
+&nbsp;
+
+### Upload Images
+
+Open the URL given by the **web-interface** node in your browser, then you can upload images.
+
+
+&nbsp;
+
+## Experiments
+
+See [`experiments`](experiments) folder for raw experimental results and the images we used during our experiments.

@@ -25,7 +25,7 @@ Compile and minify for production:
 pnpm build
 ```
 
-Finally, move static files to [`backend/src/static`](../backend/src/static):
+Finally, move the static files to [`backend/src/static`](../backend/src/static):
 
 ```bash
 pnpm mv

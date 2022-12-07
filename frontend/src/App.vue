@@ -4,11 +4,12 @@
 
     <a-form-item>
       <a-form-item name="dragger" no-style>
-        <a-upload-dragger name="files" accept="image/*" :customRequest="upload">
+        <a-upload-dragger name="files" accept="image/*" multiple :customRequest="upload">
           <p class="ant-upload-drag-icon">
             <InboxOutlined />
           </p>
           <p class="ant-upload-text">Click or drag images to this area to upload</p>
+          <p class="ant-upload-hint">Support for a single or bulk upload</p>
         </a-upload-dragger>
       </a-form-item>
     </a-form-item>

@@ -1,137 +1,130 @@
 import os
-import socket
-import time
 import uuid
-from base58 import b58encode
+import socket
 from multiprocessing import Queue
 from threading import Thread, Semaphore
 from flask import Flask, request, send_file
 from flask_socketio import SocketIO
 from flask_cors import CORS
 
-from utils import get_opts, get_image_path, load_image
+from utils import Throughput, get_opts, get_image_path, load_image, rcv_message, send_message
 
-# constants
-FLICKR_ALPHABET = b"123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-BUFFER_SIZE = 1024
-N_IMAGES = 3
-N_WORKERS = 3
+# arguments
+HOSTNAME, PORT, N_WORKERS, N_IMAGES, DELAY, LOSS = get_opts()
 
-# flask app for backend
-app = Flask(__name__)
-CORS(app)  # allow cross-origin for frontend
-app.secret_key = os.urandom(16)  # random secret key
-
-# socket server
-socketio = SocketIO(app, cors_allowed_origins="*")
+# throughput computer
+throughput = Throughput(N_IMAGES)
 
 
-semaphore = Semaphore(N_WORKERS)
-workers_limit = N_WORKERS + 1
-conn_pool = []
-images = Queue(maxsize=20)
-idle_workers = Queue(maxsize=5)
+def create_app():
+    """Create Flask app and socket server"""
+    app = Flask(__name__)  # flask app for backend
+    CORS(app)  # allow cross-origin for frontend (only for development)
+    app.secret_key = os.urandom(16)  # random secret key
 
-last_img_id = {
-    0: "",
-    1: "",
-    2: ""
-}
+    socketio = SocketIO(app, cors_allowed_origins="*")  # socket server
 
-img_num = 0
-img_size = 0  # bit
-start_time = 0.0
-total_time = 0.0  # second
+    return app, socketio
+
+app, socketio = create_app()
 
 
-def print_metrics():
-    throughput = img_size / total_time
+class WorkerPool:
+    """A class for maintaining worker sockets."""
+    def __init__(self, n_workers: int) -> None:
+        self.n_workers = n_workers
+        self.semaphore = Semaphore(n_workers)
+        self.worker_list = []
+        self.idle_worker_id_list = Queue(maxsize=5)
 
-    print("--------------------------------------")
-    print("Message size: " + str(img_size) + " bits")
-    print("Time: " + str(total_time) + " seconds")
-    print("Throughput: " + str(throughput) + " bps")
-    print("--------------------------------------")
+    def add(self, worker: socket):
+        self.worker_list.append(worker)
+
+        id = len(self.worker_list) - 1
+        if id < self.n_workers:
+            self.idle_worker_id_list.put(id)
+
+    def reassign(self, id: int):
+        """Worker #id failed, re-assign the task to another worker"""
+        self.worker_list[id].close()
+
+        id2, worker2 = self.busy()
+        print("Assigning to worker #" + str(id2) + "...")
+
+        return id2, worker2
+
+    def busy(self) -> socket:
+        """Assign a task to a worker"""
+        self.semaphore.acquire()
+        id = self.idle_worker_id_list.get()  # the worker is busy now, remove from idle work list
+        worker = self.worker_list[id]
+        return id, worker
+
+    def idle(self, id: int):
+        """Make the given worker idle"""
+        self.idle_worker_id_list.put(id)
+        self.semaphore.release()
+
+worker_pool = WorkerPool(N_WORKERS)
+
 
 def send_img_to_worker(img_id: str):
-    global start_time, total_time, img_num, img_size, last_img_id, workers_limit, \
-        images, conn_pool, idle_workers
+    """Assign and send the current image to a worker"""
 
-    semaphore.acquire()
-    id = idle_workers.get()
-    worker = conn_pool[id]
+    def to_worker(id: int, worker: socket):
+        print("Sending the image to worker #" + str(id + 1) + "...")
+        send_message(worker, img_msg, loss=LOSS)
+
+        print("Receiving result from worker #" + str(id + 1) + "...")
+        msg = rcv_message(worker, delay=DELAY)
+
+        # node fail simulation
+        if msg == "404\n":
+            print("Worker #" + str(id + 1) + " disconnected")
+            raise Exception
+
+        msg = msg.split(" ", 1)
+        cur_img_id, result = msg[0], msg[1].split("\n")[0]
+
+        print("Sending the result to frontend...")
+        socketio.emit("result", {
+            "task_id": cur_img_id,
+            "result": result,
+        })
+
+        # maybe compute throughput
+        throughput.rcv(img_msg)
+
+        # task finished, make this worker idle
+        worker_pool.idle(id)
+
+    # load image from temp dir
     img_msg = load_image(img_id) + "\n"
 
+    # assign this task to a worker
+    id1, worker1 = worker_pool.busy()
+
     try:
-        while True:
-            worker.send(img_msg.encode("utf-8"))
-            print("Sending the image to worker #" + str(id + 1) + "...")
-
-            msg = ""
-            while True:
-                feedback = worker.recv(BUFFER_SIZE)
-                msg += feedback.decode("utf-8")
-                if msg[-1] == "\n":
-                    break
-
-            if msg == "404\n":
-                print("Worker #" + str(id + 1) + " disconnected")
-                images.put(img_id)
-                raise Exception
-
-            # receive recognition result
-            msg = msg.split(" ", 1)
-            this_img_id, this_result = msg[0], msg[1].split("\n")[0]
-
-            if this_img_id != last_img_id[id]:
-                socketio.emit("result", {
-                    "task_id": this_img_id,
-                    "result": this_result,
-                })
-
-                img_size += len(img_msg.encode("utf-8")) * 8
-                img_num += 1
-
-                if img_num == N_IMAGES:
-                    total_time = time.time() - start_time
-                    print_metrics()
-                    img_num = 0
-
-                last_img_id[id] = this_img_id
-
-                break
-
-        idle_workers.put(id)
-        semaphore.release()
-
-    except Exception as e:  # a worker failed
-        conn_pool[id].close()
-
-        if workers_limit < 4:  # set 5
-            idle_workers.put(workers_limit - 1)
-            print("Assigning to worker #" + str(workers_limit) + "...")
-            workers_limit += 1
-            semaphore.release()
-        else:
-            print("No more available workers")
-
+        to_worker(id1, worker1)
+    except Exception as e:
+        # worker #id failed, re-assign this task to another worker
+        id2, worker2 = worker_pool.reassign(id1)
+        to_worker(id2, worker2)
         print(e)
 
 @app.route("/api/task", methods=["POST", "OPTIONS"])
-def receive_img():
-    global start_time
-
+def rcv_img_from_frontend():
     # generate a task id = saved temp image name
-    task_id = b58encode(uuid.uuid4().bytes, FLICKR_ALPHABET).decode()
+    task_id = str(uuid.uuid1())
 
     # save temp image
     file = request.files["file"]
     file.save(get_image_path(task_id))
 
-    # create new thread, send image to worker
-    if img_num == 0:
-        start_time = time.time()
+    # maybe record send time for computing throughput
+    throughput.send()
 
+    # create new thread, send image to worker
     worker_thread = Thread(target=send_img_to_worker, args=(task_id,))
     worker_thread.daemon = True
     worker_thread.start()
@@ -148,54 +141,33 @@ def send_img_to_frontend(task_id: str):
 def index(path: str):
     return app.send_static_file(path)
 
+def connect_to_worker(h: str, p: int):
+    """Given hostname and port, build connection with the worker"""
+    skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    skt.bind((h, p))
+    skt.listen(5)
+
+    worker, _ = skt.accept()
+    worker_pool.add(worker)  # add to worker pool
+
 def connect_to_workers():
-    global conn_pool, idle_workers, N_WORKERS, images, start_time, img_num
-
-    # Build connection with workers
-    socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    socket1.bind(("10.10.1.2", 2001))
-    socket2.bind(("10.10.2.1", 2002))
-    socket3.bind(("10.10.3.1", 2003))
-
-    # socket1.bind(("localhost", 2001))
-    # socket2.bind(("localhost", 2002))
-    # socket3.bind(("localhost", 2003))
-
-    socket1.listen(5)
-    socket2.listen(5)
-    socket3.listen(5)
-
     print("Connecting to worker #1...")
-    i = 0
-    worker, _ = socket1.accept()
-    conn_pool.append(worker)
-    if i < N_WORKERS:
-        idle_workers.put(i)
-    i += 1
+    connect_to_worker("10.10.1.2", 2001)
+    # connect_to_worker("localhost", 2001)
 
     print("Connecting to worker #2...")
-    worker2, _ = socket2.accept()
-    conn_pool.append(worker2)
-    if i < N_WORKERS:
-        idle_workers.put(i)
-    i += 1
+    connect_to_worker("10.10.2.1", 2002)
+    # connect_to_worker("localhost", 2002)
 
     print("Connecting to worker #3...")
-    worker3, _ = socket3.accept()
-    conn_pool.append(worker3)
-    if i < N_WORKERS:
-        idle_workers.put(i)
-    i += 1
+    connect_to_worker("10.10.3.1", 2003)
+    # connect_to_worker("localhost", 2003)
 
     print("Successfully connected to all workers")
 
 if __name__ == "__main__":
-    hostname, port = get_opts()
-
     connect_to_workers()
 
-    print(f"""Server is running on {hostname}:{port}...""")
-    socketio.run(app, host=hostname, port=port)
+    print(f"""Server is running on {HOSTNAME}:{PORT}""")
+    socketio.run(app, host=HOSTNAME, port=PORT)
