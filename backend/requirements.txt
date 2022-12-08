@@ -1,3 +1,5 @@
 Flask
 flask_socketio
 flask-cors
+pillow
+numpy
