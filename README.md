@@ -5,7 +5,7 @@ GENI public routable IP: http://130.127.215.146:80
 
 &nbsp;
 
-## Team & Division of Labor
+## Team
 
 - Hanlin Zou (U96634471)
 - Xiaohan Zou (U18269004)
