@@ -1,6 +1,6 @@
 # Image Recognition Application
 
-GENI public routable IP: http://130.127.215.146:80
+We implement an image-recognition service which has a web interface, where a user is able to submit an image query and the service use GoogLeNet to classify the image and returns the answer to the user. The web interface and the recognition systems are on separate nodes, and they are connected using socket programming.
 
 
 &nbsp;
@@ -26,6 +26,23 @@ GENI public routable IP: http://130.127.215.146:80
 ## Demo Video
 
 https://user-images.githubusercontent.com/29454156/206197721-3ddd04a1-50f2-4eca-9b85-26cddef595b3.mp4
+
+
+&nbsp;
+
+## Reproducibility
+
+- Scripts to setup the experiment: [`backend/install.sh`](backend/install.sh) and [`worker/install.sh`](worker/install.sh)
+- Code and code quality: [`frontend`](frontend), [`backend`](backend) and [`worker`](worker)
+- Rspec files: [`geni.xml`](geni.xml)
+- Instructions to reproduce experiment: see [here](#usage) and [here](experiments/README.md)
+
+
+&nbsp;
+
+## Report
+
+See [here](https://github.com/Renovamen/BU-CS655-Image-Recognition/blob/main/report.pdf) for our report. Also see [`experiments`](experiments) folder for raw experimental results and the images we used during our experiments.
 
 
 &nbsp;
@@ -113,10 +130,3 @@ python3 main.py --hostname 10.10.3.1 --port 2003 --fail 0
 ### Upload Images
 
 Open the URL given by the **web-interface** node in your browser, then you can upload images.
-
-
-&nbsp;
-
-## Experiments
-
-See [`experiments`](experiments) folder for raw experimental results and the images we used during our experiments.
