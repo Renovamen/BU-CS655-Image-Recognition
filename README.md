@@ -97,7 +97,7 @@ sudo python3 main.py --hostname 0.0.0.0 --port 80 --workers 3 --images 4 --delay
 
 &nbsp;
 
-### Run workers
+### Run Workers
 
 **node-1**:
 
