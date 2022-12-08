@@ -38,6 +38,7 @@ class WorkerPool:
         self.idle_worker_id_list = Queue(maxsize=5)
 
     def add(self, worker: socket):
+        """Add a worker to pool"""
         self.worker_list.append(worker)
 
         id = len(self.worker_list) - 1
@@ -142,7 +143,7 @@ def index(path: str):
     return app.send_static_file(path)
 
 def connect_to_worker(h: str, p: int):
-    """Given hostname and port, build connection with the worker"""
+    """Given the hostname and port, build connection with the worker"""
     skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     skt.bind((h, p))

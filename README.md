@@ -1,6 +1,6 @@
 # Image Recognition Application
 
-We implement an image-recognition service which has a web interface, where a user is able to submit an image query and the service use GoogLeNet to classify the image and returns the answer to the user. The web interface and the recognition systems are on separate nodes, and they are connected using socket programming.
+We implement an image-recognition service which has a web interface, where a user is able to submit an image query and the service uses GoogLeNet to classify the image and returns the answer to the user. The web interface and the recognition systems are on separate nodes, and they are connected using socket programming.
 
 
 &nbsp;

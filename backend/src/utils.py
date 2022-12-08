@@ -26,7 +26,7 @@ def get_image_path(filename: str):
     return os.path.join(IMAGE_DIR, filename)
 
 def load_image(image_id: str):
-    """Load an image and convert it to string."""
+    """Load an image and convert it to string"""
     img = Image.open(os.path.join(IMAGE_DIR, image_id)).convert('RGB')
     img = np.asarray(img)  # (h, w, c)
 
@@ -39,7 +39,7 @@ def load_image(image_id: str):
     return img_s
 
 def rcv_message(skt: socket, delay: float = 0.) -> str:
-    """Receive a meesage from a given socket"""
+    """Receive a message via a given socket"""
     msg = ""
 
     while True:
@@ -54,6 +54,7 @@ def rcv_message(skt: socket, delay: float = 0.) -> str:
 def send_message(
     skt: socket, msg: str, loss: float = 0., timeout: int = 5
 ):
+    """Send a message via a given socket"""
     skt.send(msg.encode("utf-8"))
 
     # loss simulation

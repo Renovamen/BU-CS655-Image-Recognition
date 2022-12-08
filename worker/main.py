@@ -19,7 +19,7 @@ with open("./labels.json", "r", encoding="utf8") as f:
 
 
 def rcv_message(skt: socket) -> str:
-    """Receive a meesage from a given socket"""
+    """Receive a meesage via a given socket"""
     msg = ""
 
     while True:
@@ -31,6 +31,7 @@ def rcv_message(skt: socket) -> str:
     return msg
 
 def inference(h: int, w: int, c: int, image: str) -> str:
+    """Forward the image to model for prediction"""
     image = np.array(image.split()).astype(np.uint8)
     image = image.reshape(h, w, c)
     image = Image.fromarray(image)

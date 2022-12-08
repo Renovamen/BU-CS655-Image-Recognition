@@ -20,10 +20,9 @@
         :key="item.requestId"
         :span="12"
       >
-        <a-card hoverable style="width: 300px">
+        <a-card hoverable style="width: calc((100% - 20) / 2)">
           <template #cover>
-            <!-- <a-image :width="300" :src="HOSTNAME + item.imageUrl" /> -->
-            <a-image :width="300" :src="item.imageUrl" />
+            <a-image :src="HOSTNAME + item.imageUrl" />
           </template>
           <a-card-meta :title="`${item.name} is:`">
             <template #description>
@@ -43,16 +42,23 @@ import { InboxOutlined } from "@ant-design/icons-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
 
-// const HOSTNAME = "http://127.0.0.1:80/";
-// const API = HOSTNAME + "api/task";
-const API = "api/task";
+type Result = {
+  imageUrl: string,
+  requestId: string,
+  name: string,
+  result?: string
+}
 
-const resultList = ref<any>([]);
-const resultDict = ref<any>({});
+// const HOSTNAME = "http://127.0.0.1:80/";
+const HOSTNAME = "";
+const API = HOSTNAME + "api/task";
+
+const resultList = ref<Result[]>([]);
+const resultDict = ref<{ [key: string]: Result }>({});
 
 // setup socket connection
-const socket = io();
 // const socket = io(HOSTNAME);
+const socket = io();
 
 // get a recognition result from backend and display it
 socket.on("result", (data): void => {
@@ -81,7 +87,7 @@ const upload = async ({ onSuccess, onError, file }: any) => {
     // backend will return a requestId
     // the image URL will be "upload/{requestId}"
     const requestId = result.data;
-    const element = {
+    const element: Result = {
       imageUrl: `upload/${requestId}`,
       requestId: requestId,
       name: file.name,
@@ -101,8 +107,19 @@ const upload = async ({ onSuccess, onError, file }: any) => {
 
 <style scoped>
 .container {
-  width: 620px;
   margin: 0 auto;
+  width: 620px;
   padding: 30px 0;
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: 100%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
 }
 </style>
