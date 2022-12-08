@@ -4,12 +4,13 @@ import socket
 import argparse
 import numpy as np
 import torch
-from torchvision.models import googlenet
+from torchvision import models, transforms
+from PIL import Image
 
 BUFFER_SIZE = 1024
 
 # load model
-model = googlenet(pretrained=True)
+model = models.googlenet(pretrained=True)
 model.eval()
 
 # load class names (labels)
@@ -29,11 +30,11 @@ def rcv_message(skt: socket) -> str:
 
     return msg
 
-def inference(image) -> str:
-    n, m, image = image[1], image[2], image[3].split()
-
-    image = np.array(image).astype(np.float32)
-    image = torch.tensor(image).view(1, 3, int(n), int(m))
+def inference(h: int, w: int, c: int, image: str) -> str:
+    image = np.array(image.split()).astype(np.uint8)
+    image = image.reshape(h, w, c)
+    image = Image.fromarray(image)
+    image = transforms.ToTensor()(image).unsqueeze(0)
 
     scores = model(image)[0]
     pred = labels[str(torch.argmax(scores).item())]
@@ -56,12 +57,11 @@ def run_worker(hostname: str, port: int, fail: float = 0.0):
             skt.close()
             break
 
-        image_msg = image_msg.split(" ", 3)
-        seqnum = image_msg[0]
+        seqnum, h, w, c, image = tuple(image_msg.split(" ", 4))
 
         if seqnum != last_seqnum:  # not duplicate, use model to predict
             print("Recognizing image...")
-            last_result = inference(image_msg)
+            last_result = inference(int(h), int(w), int(c), image)
             last_seqnum = seqnum
 
         print("Sending recognition result to web interface node...")

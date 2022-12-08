@@ -71,6 +71,9 @@ worker_pool = WorkerPool(N_WORKERS)
 def send_img_to_worker(img_id: str):
     """Assign and send the current image to a worker"""
 
+    # load image from temp dir
+    img_msg = load_image(img_id) + "\n"
+
     def to_worker(id: int, worker: socket):
         print("Sending the image to worker #" + str(id + 1) + "...")
         send_message(worker, img_msg, loss=LOSS)
@@ -98,16 +101,13 @@ def send_img_to_worker(img_id: str):
         # task finished, make this worker idle
         worker_pool.idle(id)
 
-    # load image from temp dir
-    img_msg = load_image(img_id) + "\n"
-
     # assign this task to a worker
     id1, worker1 = worker_pool.busy()
 
     try:
         to_worker(id1, worker1)
     except Exception as e:
-        # worker #id failed, re-assign this task to another worker
+        # worker #id1 failed, re-assign this task to another worker
         id2, worker2 = worker_pool.reassign(id1)
         to_worker(id2, worker2)
         print(e)
