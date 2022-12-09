@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/29454156/206197721-3ddd04a1-50f2-4eca-
 
 ## Reproducibility
 
-- Scripts to setup the experiment: [`backend/install.sh`](backend/install.sh) and [`worker/install.sh`](worker/install.sh)
+- Scripts to setup the experiment: [`setup/interface.sh`](setup/interface.sh) (web interface) and [`setup/worker.sh`](setup/worker.sh) (worker)
 - Code and code quality: [`frontend`](frontend), [`backend`](backend) and [`worker`](worker)
 - Rspec files: [`geni.xml`](geni.xml)
 - Instructions to reproduce experiment: see [here](#usage) and [here](experiments/README.md)
